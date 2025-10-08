@@ -16,4 +16,17 @@ public class BitUtils {
         word= word & ~maskset; 
         return word | value<<start; 
     }
+
+    //pour obtenir k
+    public static int getK(int[] input){
+        int max= 0; 
+        for(int val: input){
+            if(val > max){
+                max=val; 
+            }
+        }
+        if (max == 0) return 1;
+        return 32 - Integer.numberOfLeadingZeros(max);
+
+    }
 }
