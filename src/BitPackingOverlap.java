@@ -19,7 +19,8 @@ public class BitPackingOverlap {
             }
             else{ // sinon on doit écrire les writebits1 bits dans tabcompress[index] et les k-writebits1 bits dans tabcompress[index+1]
                 tabcompress[index]=BitUtils.setBits(tabcompress[index], start, writebits1, input[i]); 
-                tabcompress[index]=BitUtils.setBits(tabcompress[index+1], start, k-writebits1, input[i]); 
+                int temp = input[i]>>writebits1; // on décale input[i] de writebits1 positions vers la droite pour écrire les bits restants
+                tabcompress[index+1]=BitUtils.setBits(tabcompress[index+1], 0, k-writebits1, temp); 
             } 
         }
         return tabcompress; 

@@ -17,8 +17,9 @@ public class Main {
         
 
         //--------------------------------TEST  BitPackingNoOverlap-----------------------------------------------
-
-        int[] input = {5, 7, 2, 9, 4, 3, 8, 20, 30, 44, 88, 100};
+        System.out.println(" ");
+        System.out.println("========== TEST NO OVERLAP========");
+        int[] input = {5, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 100};
 
         int k1= BitUtils.getK(input); 
         BitPackingNoOverlap P = new BitPackingNoOverlap(k1);
@@ -26,7 +27,6 @@ public class Main {
 
         // Compression
         int[] tabcompress = P.compress(input);
-        System.out.println(" ");
         System.out.println("=== COMPRESSION ===");
         for (int compressWord : tabcompress) {
             System.out.println(Integer.toBinaryString(compressWord));
@@ -43,9 +43,43 @@ public class Main {
         System.out.println();
 
         // Test get
-        System.out.println("=== ACCÈS DIRECT ===");
+        System.out.println("=== GET===");
         System.out.println("Valeur à l'indice 3 = " + P.get(3));
         System.out.println("Valeur à l'indice 0 = " + P.get(0));
+
+
+                //--------------------------------TEST  BitPackingOverlap-----------------------------------------------
+        System.out.println(" ");
+        System.out.println("========== TEST OVERLAP========");
+        int[] input2 = {5, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 100};
+
+        int k2= BitUtils.getK(input2); 
+        BitPackingOverlap P2 = new BitPackingOverlap(k2);
+        System.err.println("k = "+k2);
+
+        // Compression
+        int[] tabcompress2 = P2.compress(input2);
+        System.out.println("=== COMPRESSION ===");
+        for (int compressWord2 : tabcompress2) {
+            System.out.println(Integer.toBinaryString(compressWord2));
+        }
+
+        // Décompression
+        int[] output2 = new int[input2.length];
+        output2 = P2.decompress(output2);
+
+        System.out.println("=== DECOMPRESSION ===");
+        for (int val : output2) {
+            System.out.print(val + " ");
+        }
+        System.out.println();
+
+        // Test get
+        System.out.println("=== GET===");
+        System.out.println("Valeur à l'indice 3 = " + P2.get(3));
+        System.out.println("Valeur à l'indice 0 = " + P2.get(0));
+    
+    
     
     }
 }
