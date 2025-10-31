@@ -48,6 +48,8 @@ public class Main {
         System.out.println("Valeur à l'indice 0 = " + P.get(0));
 
 
+ 
+    
                 //--------------------------------TEST  BitPackingOverlap-----------------------------------------------
         System.out.println(" ");
         System.out.println("========== TEST OVERLAP========");
@@ -78,8 +80,38 @@ public class Main {
         System.out.println("=== GET===");
         System.out.println("Valeur à l'indice 3 = " + P2.get(3));
         System.out.println("Valeur à l'indice 0 = " + P2.get(0));
-    
-    
+        
+
+               //--------------------------------TEST  BitPackingOverflow-----------------------------------------------
+        System.out.println(" ");
+        System.out.println("========== TEST OVERFLOW========");
+        int[] input3= {1000, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
+
+        int k3= BitUtils.getK(input3); 
+        BitPackingOverflow P3 = new BitPackingOverflow(k3);
+        System.err.println("k = "+k3);
+
+        // Compression
+        int[] tabcompress3 = P3.compress(input3);
+        System.out.println("=== COMPRESSION ===");
+        for (int compressWord3 : tabcompress3) {
+            System.out.println(Integer.toBinaryString(compressWord3));
+        }
+
+        // Décompression
+        int[] output3 = new int[input3.length];
+        output3 = P3.decompress(output3);
+
+        System.out.println("=== DECOMPRESSION ===");
+        for (int val : output3) {
+            System.out.print(val + " ");
+        }
+        System.out.println();
+
+        // Test get
+        System.out.println("=== GET===");
+        System.out.println("Valeur à l'indice 3 = " + P3.get(3));
+        System.out.println("Valeur à l'indice 0 = " + P3.get(0));        
     
     }
 }
