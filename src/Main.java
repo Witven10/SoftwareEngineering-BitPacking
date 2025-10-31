@@ -19,7 +19,7 @@ public class Main {
         //--------------------------------TEST  BitPackingNoOverlap-----------------------------------------------
         System.out.println(" ");
         System.out.println("========== TEST NO OVERLAP========");
-        int[] input = {5, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 100};
+        int[] input = {5, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
 
         int k1= BitUtils.getK(input); 
         BitPackingNoOverlap P = new BitPackingNoOverlap(k1);
@@ -53,7 +53,7 @@ public class Main {
                 //--------------------------------TEST  BitPackingOverlap-----------------------------------------------
         System.out.println(" ");
         System.out.println("========== TEST OVERLAP========");
-        int[] input2 = {5, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 100};
+        int[] input2 = {5, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
 
         int k2= BitUtils.getK(input2); 
         BitPackingOverlap P2 = new BitPackingOverlap(k2);
@@ -85,7 +85,7 @@ public class Main {
                //--------------------------------TEST  BitPackingOverflow-----------------------------------------------
         System.out.println(" ");
         System.out.println("========== TEST OVERFLOW========");
-        int[] input3= {1000, 7, 2, 9, 17, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
+        int[] input3= {1000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
 
         int k3= BitUtils.getK(input3); 
         BitPackingOverflow P3 = new BitPackingOverflow(k3);

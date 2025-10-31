@@ -15,6 +15,7 @@ public class BitPackingOverflow{
                 n_overflow +=1; 
             }
         }
+        System.out.println("Nombre d'entiers en overflow: " + n_overflow);
 
         //J'ai choisi de stocker ( input.lenght,  n_overflow, k_prime;) en début de tableau compressé, pour pouvoir les récupérer lors de la décompression
         //avec k_prime 5 bits maximum car on va écrire cahque nombre avec k_prime+1 bits (0 ou 1 + k' bits pour le nombre)
@@ -45,30 +46,36 @@ public class BitPackingOverflow{
             if(input[i] < (1<<k_prime)){ 
                 int writebits1= 32-start; // nombre de bits qu'on peut écrire dans tabcompress[index] à partir de start
                 if(writebits1 >= k_plus1){ // si on peut écrire tous les k_plus1 bits dans tabcompress[index]
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start, 1, 0); //on écrit le bit de contrôle à 0
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start+1, k_prime, input[i]);         
+                    int val_a_ecrire = input[i] & BitUtils.maskK(k_prime); //on prend les k' bits de poids faible de l'entier à écrire
+                    int valeur_totale =  (val_a_ecrire<<1) | 0; // on ajoute le bit de contrôle à 0 au début, on le met sur le bit de poids faible pour y accéder plus simplement
+                    // j'écris la valeur totale (bit de contrôle + k' bits de l'entier) dans tabcompress
+                    tabcompress[index] = BitUtils.setBits(tabcompress[index], start, k_plus1, valeur_totale);       
                 }
                 else{ // sinon on doit écrire les writebits1 bits dans tabcompress[index] et les k_plus1-writebits1 bits dans tabcompress[index+1]
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start, 1, 0); 
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start+1, writebits1-1, input[i]);
+                    int val_a_ecrire = input[i] & BitUtils.maskK(k_prime); //on prend les k' bits de poids faible de l'entier à écrire
+                    int valeur_totale =  (val_a_ecrire<<1) | 0; // on ajoute le bit de contrôle à 0 au début, on le met sur le bit de poids faible pour y accéder plus simplement
+                    tabcompress[index] = BitUtils.setBits(tabcompress[index], start, writebits1, valeur_totale); 
                     if (index + 1 < tabcompress.length) {
-                        int temp = input[i]>>writebits1-1; // on décale input[i] de writebits1-1 positions vers la droite pour écrire les bits restants
-                        tabcompress[index+1]=BitUtils.setBits(tabcompress[index+1], 0, k_prime-writebits1-1, temp); 
+                        int temp = valeur_totale>>writebits1; // on décale input[i] de writebits1 positions vers la droite pour écrire les bits restants
+                        tabcompress[index+1]=BitUtils.setBits(tabcompress[index+1], 0, k_plus1-writebits1, temp); 
                     }
                 } 
             }
             else{  
                 int writebits1= 32-start; // nombre de bits qu'on peut écrire dans tabcompress[index] à partir de start
                 if(writebits1 >= k_plus1){ // si on peut écrire tous les k_plus1 bits dans tabcompress[index]
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start, 1, 1); //on écrit le bit de contrôle à 0
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start+1, k_prime, pos_overflow); //on écrit des 0 dans les k' bits suivants
-;
+                    int val_a_ecrire = pos_overflow & BitUtils.maskK(k_prime); //on prend les k' bits de poids faible de la position en overflow à écrire
+                    int valeur_totale =  (val_a_ecrire<<1) | 1; // on ajoute le bit de contrôle à 0 au début, on le met sur le bit de poids faible pour y accéder plus simplement
+                    tabcompress[index] = BitUtils.setBits(tabcompress[index], start, k_plus1, valeur_totale);     
+                    
                 }
                 else{ // sinon on doit écrire les writebits1 bits dans tabcompress[index] et les k_plus1-writebits1 bits dans tabcompress[index+1]
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start, 1, 1); 
-                    tabcompress[index]=BitUtils.setBits(tabcompress[index], start+1, writebits1-1, pos_overflow);
+                    int val_a_ecrire = pos_overflow & BitUtils.maskK(k_prime); //on prend les k' bits de poids faible de l'entier à écrire
+                    int valeur_totale =  (val_a_ecrire<<1) | 1; // on ajoute le bit de contrôle à 0 au début, on le met sur le bit de poids faible pour y accéder plus simplement
+                    tabcompress[index] = BitUtils.setBits(tabcompress[index], start, writebits1, valeur_totale); 
                     if (index + 1 < tabcompress.length) {
-                        tabcompress[index+1]=BitUtils.setBits(tabcompress[index+1], 0, k_prime-writebits1-1, pos_overflow >> (writebits1-1)); 
+                        int temp = valeur_totale>>writebits1; // on décale input[i] de writebits1 positions vers la droite pour écrire les bits restants
+                        tabcompress[index+1]=BitUtils.setBits(tabcompress[index+1], 0, k_plus1-writebits1, temp); 
                     }
                 }
                 //on écrit l'entier en overflow à la position correspondante
@@ -81,7 +88,7 @@ public class BitPackingOverflow{
                     tabcompress[overflow_index]=BitUtils.setBits(tabcompress[overflow_index], overflow_start, k, input[i]);           
                 }
                 else{ // sinon on doit écrire les writebits1_o bits dans tabcompress[overflow_index] et les k-writebits1_o bits dans tabcompress[overflow_index+1]
-                    tabcompress[index]=BitUtils.setBits(tabcompress[overflow_index], overflow_start, writebits1_o, input[i]); 
+                    tabcompress[overflow_index]=BitUtils.setBits(tabcompress[overflow_index], overflow_start, writebits1_o, input[i]); 
                     if (overflow_index + 1 < tabcompress.length) {
                         int temp = input[i]>>writebits1_o; // on décale input[i] de writebits1 positions vers la droite pour écrire les bits restants
                         tabcompress[overflow_index+1]=BitUtils.setBits(tabcompress[overflow_index+1], 0, k-writebits1_o, temp); 
@@ -96,6 +103,7 @@ public class BitPackingOverflow{
 
     public int[] decompress(int[] output) { 
         for(int i=0; i<output.length; i++){
+            System.out.println("Décompression de l'indice " + i);
             output[i]= get(i);        
         }
         return output; 
@@ -112,19 +120,21 @@ public class BitPackingOverflow{
 
         int index= (32+i*k_plus1)/32; 
         int start= (32+i*k_plus1) % 32;
-        int control_bit= BitUtils.getBits(tabcompress[index], start, 1); 
-        start= start + 1; //pour lire l'entier, on commence après le bit de contrôle
         int writebits1= 32-start; // nombre de bits qu'on peut écrire dans tabcompress[index] à partir de start
         int retour = 0;  
-        if(writebits1 >= k_prime){ // si on peut écrire tous les k bits dans tabcompress[index]
-            retour= BitUtils.getBits(tabcompress[index], start, k_prime);           
+        int control_bit= 0; 
+        int valeur_totale=0;
+        if(writebits1 >= k_plus1){ // si on peut écrire tous les k bits dans tabcompress[index]
+            valeur_totale= BitUtils.getBits(tabcompress[index], start, k_plus1);           
         }
         else{ // sinon on doit lire les writebits1 bits dans tabcompress[index] et les k_prime-writebits1 bits dans tabcompress[index+1]
             int part1= BitUtils.getBits(tabcompress[index], start, writebits1);
-            int part2= BitUtils.getBits(tabcompress[index+1], 0, k_prime - writebits1);
-            retour=  part1 | (part2 << writebits1); 
+            int part2= BitUtils.getBits(tabcompress[index+1], 0, k_plus1 - writebits1);
+            valeur_totale=  part1 | (part2 << writebits1); 
         }
-        
+        control_bit= valeur_totale & 1; //le bit de contrôle est le bit de poids faible
+        retour= valeur_totale >> 1; //on décale de 1 position vers la droite pour obtenir la valeur sans le bit de contrôle
+        System.out.println("index = " + index + ", start = " + start + ", control_bit = " + control_bit + ", retour = " + retour);
         if(control_bit ==0){ //l'entier est stocké directement
             return retour;
         }
