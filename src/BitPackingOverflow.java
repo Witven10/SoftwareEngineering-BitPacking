@@ -1,11 +1,11 @@
-public class BitPackingOverflow{
+public class BitPackingOverflow implements BitPacking {
     private final int k;
     private int[] tabcompress;
 
     public BitPackingOverflow(int k ) {  
         this.k = k;
  }
-
+    @Override
     public int[] compress(int[] input) { 
         
         int k_prime=7; //je fixe k' à 3 pour l'exemple, afin de tester le reste de l'algorithme que je veux utiliser, par la suite je chercherer un k optimale
@@ -101,9 +101,9 @@ public class BitPackingOverflow{
 
     }
 
+    @Override
     public int[] decompress(int[] output) { 
         for(int i=0; i<output.length; i++){
-            System.out.println("Décompression de l'indice " + i);
             output[i]= get(i);        
         }
         return output; 
@@ -111,6 +111,7 @@ public class BitPackingOverflow{
 
     }
 
+    @Override
     public int get(int i) { 
 
         int taille= BitUtils.getBits(tabcompress[0], 0, 12);
@@ -129,12 +130,14 @@ public class BitPackingOverflow{
         }
         else{ // sinon on doit lire les writebits1 bits dans tabcompress[index] et les k_prime-writebits1 bits dans tabcompress[index+1]
             int part1= BitUtils.getBits(tabcompress[index], start, writebits1);
-            int part2= BitUtils.getBits(tabcompress[index+1], 0, k_plus1 - writebits1);
-            valeur_totale=  part1 | (part2 << writebits1); 
+            valeur_totale = part1; //au cas où on n'arrive pas à lire la totalité des bits, on initialise valeur_totale avec la partie lue
+            if (index + 1 < tabcompress.length){  
+                int part2= BitUtils.getBits(tabcompress[index+1], 0, k_plus1 - writebits1);
+                valeur_totale=  part1 | (part2 << writebits1); 
+            }
         }
         control_bit= valeur_totale & 1; //le bit de contrôle est le bit de poids faible
         retour= valeur_totale >> 1; //on décale de 1 position vers la droite pour obtenir la valeur sans le bit de contrôle
-        System.out.println("index = " + index + ", start = " + start + ", control_bit = " + control_bit + ", retour = " + retour);
         if(control_bit ==0){ //l'entier est stocké directement
             return retour;
         }
@@ -153,6 +156,9 @@ public class BitPackingOverflow{
                 if (overflow_index + 1 < tabcompress.length) {
                     int part2= BitUtils.getBits(tabcompress[overflow_index+1], 0, k - writebits1_o);
                     retour_overflow=  part1 | (part2 << writebits1_o); 
+                }
+                else {
+                    retour_overflow = part1; //si on est ici, c'est que l'entier en overflow est mal formé, on retourne au moins la partie lue
                 }
             } 
             return retour_overflow;

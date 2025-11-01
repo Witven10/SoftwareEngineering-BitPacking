@@ -1,10 +1,11 @@
-public class BitPackingOverlap {
+public class BitPackingOverlap implements BitPacking {
     private final int k;
     private int[] tabcompress;
 
     public BitPackingOverlap(int k) { 
         this.k = k; }
 
+    @Override
     public int[] compress(int[] input) { 
         tabcompress = new int[(int)Math.ceil((double)(input.length*k)/32)];  //le nombre de bits exact qu'on veut écrire est input.length*k, donc le nombre de cases nécessaires est (input.length*k)/32 arrondi à l'entier supérieur
         for(int i=0; i<input.length; i++){
@@ -34,6 +35,7 @@ public class BitPackingOverlap {
 
     }
 
+    @Override
     public int[] decompress(int[] output) { 
         for(int i=0; i<output.length; i++){
             output[i]= get(i);        
@@ -42,7 +44,7 @@ public class BitPackingOverlap {
         
 
     }
-
+    @Override
     public int get(int i) { 
         int index= i*k/32; 
         int start= (i*k) % 32; 
