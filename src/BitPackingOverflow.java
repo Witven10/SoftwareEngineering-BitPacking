@@ -38,7 +38,7 @@ public class BitPackingOverflow implements BitPacking {
 
         int total_bits= 32 + input.length * (k_prime+1) + n_overflow * k; //nombre total de bits à stocker
         tabcompress = new int[(int)Math.ceil((double)(total_bits)/32)];
-        System.out.println("valeur de k : " + k + " Taille du tableau compressé (en bits) : " + tabcompress.length * 32);
+        
 
 
         //on écrit d'abord les la taille et k' au début de tabcompress

@@ -9,7 +9,7 @@ public class BitPackingNoOverlap implements BitPacking {
     public int[] compress(int[] input) { 
         int nb_mot = 32/k; 
         tabcompress = new int[(int)Math.ceil((double)input.length / nb_mot)];  //crée le tableau pour compresser avec le bon nombre de cases
-        System.out.println("valeur de k : " + k + " Taille du tableau compressé (en bits) : " + tabcompress.length * 32);
+        
         for(int i=0; i<input.length; i++){
             if(input[i] < 0 || input[i] >= (1<<k)) { //vérifie que la valeur peut être stockée dans k bits
                 throw new IllegalArgumentException("Valeur ne peut pas être représentée sur k bits: " + input[i]);

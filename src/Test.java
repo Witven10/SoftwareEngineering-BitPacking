@@ -3,12 +3,15 @@ public class Test{
     public static void testCompressionMethod(BitPacking compresseur, int[] input) {
         System.out.println("\n=== COMPRESSION ===");
         int[] compressed = compresseur.compress(input);
-        System.out.println("");
+        //à décommanter pour debugger 
+        /*System.out.println("");
         for (int compressWord3 : compressed) { // afficher les mots compressés en binaire, pour vérifier visuellement en cas d'erreur
             System.out.println(Integer.toBinaryString(compressWord3));
-        }
+        } */
+        System.out.println("Compression terminée. Taille compressée: " + compressed.length + " entiers.");
         int[] output = new int[input.length];
-        output = compresseur.decompress(output);  
+        output = compresseur.decompress(output); 
+
         System.out.println("\n=== DECOMPRESSION ===AND=== GET===");
         if(output.length != input.length) {
             System.out.println("Erreur: la taille du tableau décompressé ne correspond pas à la taille du tableau d'entrée.");
@@ -34,7 +37,7 @@ public class Test{
             System.out.println("Il y a des erreurs.");
 
         }
-        System.out.println("=============Fin du test pour ce mode=============");
+        //System.out.println("=============Fin du test pour ce mode=============");
     }
 }
 
