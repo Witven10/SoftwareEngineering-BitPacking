@@ -67,12 +67,6 @@ The default `Main` workflow:
 - Overflow values are appended after the main packed stream; `get(i)` resolves them transparently.
 - This strategy mirrors the specification example (e.g., encoding `[1,2,3,1024,4,5,2048]` with 3-bit primaries and 11-bit overflow values).
 
-## Future Work
-- Add formal unit tests (JUnit) for edge cases such as empty arrays, maximum 32-bit values, and repeated overflow patterns.
-- Extend the CLI or provide configuration files to benchmark external data sets.
-- Investigate support for negative numbers: discuss sign handling (two's complement, zigzag encoding, offsets) in the PDF report and implement a chosen policy.
-- Automate benchmark result exports (CSV/JSON) for plotting and comparison.
-
 ## License
 Academic project for Software Engineering Project 2025. Add a formal license file before distributing beyond the course requirements.
 
