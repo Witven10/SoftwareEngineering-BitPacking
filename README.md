@@ -1,70 +1,80 @@
 # SoftwareEngineering-BitPacking
 
-Implantation en Java de la compression d'entiers 32 bits par bit packing, avec trois strategies (sans recouvrement, recouvrement, gestion des depassements) ainsi qu'un banc d'essai pour mesurer l'efficacite et les performances.
+Java implementation of bit packing strategies to compress integer arrays while preserving random access to every element. The repository includes three compression modes, a factory for streamlined creation, correctness checks, and a repeatable benchmarking harness as required for the Software Engineering Project 2025.
 
-## Apercu
-- Objectif principal : reduire l'empreinte memoire de tableaux d'entiers en regroupant leurs bits dans des blocs de 32 bits.
-- L'interface `BitPacking` definit l'API commune (`compress`, `decompress`, `get`).
-- Trois variantes sont fournies via la fabrique `BitPackingFactory` :
-  - `BitPackingNoOverlap` : decoupe fixe, aucun chevauchement entre les mots compresses (utile quand `k` divise 32).
-  - `BitPackingOverlap` : autorise le chevauchement pour ne perdre aucun bit lorsque `k` ne divise pas 32.
-  - `BitPackingOverflow` : selectionne dynamiquement la precision `k'` et stocke dans une zone reservee les valeurs trop grandes.
-- `Main` orchestre tests de validite et benchmarks (temps de compression/decompression/acces direct et ratio de compression).
+## Project Goals
+- Reduce transmission size of integer arrays by encoding each element on the minimum required number of bits instead of full 32-bit integers.
+- Preserve direct `O(1)` access to the i-th element even after compression.
+- Compare multiple packing strategies, including a mode with overflow handling for outliers.
+- Provide reliable timing measurements to decide when compression compensates transmission latency.
 
-## Organisation du code
-- `src/BitPacking.java` : interface commune.
-- `src/BitPackingNoOverlap.java`, `src/BitPackingOverlap.java`, `src/BitPackingOverflow.java` : implantations concretes.
-- `src/BitPackingFactory.java` : creation de l'instance adequat selon le mode.
-- `src/BitUtils.java` : utilitaires de manipulation de bits (`maskK`, `getBits`, `setBits`, `getK`).
-- `src/Test.java` : verifie que chaque implementation restitue les valeurs originales et que `get(i)` est coherent.
-- `src/BenchmarkRunner.java` : protocole de mesure (warm-up JIT + moyennes).
-- `src/Main.java` : point d'entree qui lance validations et benchmarks sur un jeu de donnees exemple.
+## Features
+- `BitPackingNoOverlap`: packs values into 32-bit words without crossing integer boundaries; ideal when `k` divides 32.
+- `BitPackingOverlap`: allows bit fields to span consecutive integers; guarantees compactness even when `k` does not divide 32.
+- `BitPackingOverflow`: dynamically selects a smaller width `k'` and stores outliers in an overflow area flagged by a control bit.
+- `BitPackingFactory`: centralised creation of the desired strategy from a single string parameter (`"nooverlap"`, `"overlap"`, `"overflow"`).
+- `Test` harness: validates `compress`, `decompress`, and `get` for every implementation.
+- `BenchmarkRunner`: warm-up aware timing harness returning average nanosecond costs for each primitive operation.
+- `Main`: demonstration runner that executes validation, benchmarks, and reports compression ratios.
 
-## Prerequis
-- JDK 17 ou version plus recente (projet teste avec une JVM standard, sans dependances externes).
+## Repository Layout
+- `src/BitPacking.java`: common interface.
+- `src/BitPackingNoOverlap.java`, `src/BitPackingOverlap.java`, `src/BitPackingOverflow.java`: strategy implementations.
+- `src/BitPackingFactory.java`: factory method pattern.
+- `src/BitUtils.java`: reusable bit manipulation helpers (`maskK`, `getBits`, `setBits`, `getK`).
+- `src/Test.java`: correctness checks and console reporting.
+- `src/BenchmarkRunner.java`: timing protocol with JVM warm-up and averaging.
+- `src/Main.java`: entry point combining validation and benchmarking.
+- `report/`: placeholder for the required PDF report (create and commit your document here).
+- `docs/`: optional location for additional artefacts (e.g., charts, design notes).
 
-## Compilation et execution
-Depuis la racine du depot :
+## Prerequisites
+- JDK 17 or newer (any standard JVM distribution).  
+- No external libraries required.
+
+## Build & Run
+From the repository root:
 
 ```bash
-# Compilation (les classes generees sont placees dans out/)
+# Compile all sources (outputs class files into out/)
 javac -d out src/*.java
 
-# Lancer le scenario complet (tests + benchmarks)
+# Run validation + benchmark scenario
 java -cp out Main
 ```
 
-Par defaut `Main` :
-- calcule `k_max` a partir des donnees d'entree via `BitUtils.getK`,
-- cree tour a tour les compresseurs `nooverlap`, `overlap`, `overflow`,
-- verifie la bonne decomposition/recomposition (`Test.testCompressionMethod`),
-- mesure les temps moyens (compression, decompression, acces direct) et calcule le ratio de compression.
+The default `Main` workflow:
+- derives `k_max` from the sample array via `BitUtils.getK`,
+- instantiates each compressor (`nooverlap`, `overlap`, `overflow`) through the factory,
+- runs `Test.testCompressionMethod` to confirm round-trip integrity and `get(i)` correctness,
+- benchmarks compression, decompression, and random access times, plus calculates compression ratio and space savings,
+- prints latency payback information (`T_C + T_D`) to estimate when compression amortises transmission delays.
 
-### Modifier les entrees ou repetitions
-Editez `src/Main.java` :
-- Tableaux d'entree : variable `input_bench`.
-- Nombre de repetitions pour les benchmarks : constante `REPETITIONS`.
-- Liste des modes testes : tableau `{"nooverlap", "overlap", "overflow"}`.
+### Customising Experiments
+- Edit `src/Main.java` to change the sample array (`input_bench`) or the number of benchmark repetitions (`REPETITIONS`).
+- To time a single method in isolation, call `BenchmarkRunner.runBenchmark` with the desired compressor, data set, and method name (`"compress"`, `"decompress"`, `"get"`).
+- For targeted validation, create a compressor via the factory and invoke `Test.testCompressionMethod`.
 
-## Tests rapides
-Pour isoler la validation fonctionnelle sans lancer les benchmarks, vous pouvez directement appeler la methode de test :
+## Benchmark Protocol
+- Each benchmark includes 10 warm-up iterations per method to trigger JIT compilation before timing.
+- Timing is repeated `REPETITIONS` times and averaged to reduce noise.
+- `get` timing is reported per element (total time divided by array length).
+- Compression ratios compare the original 32-bit-per-element footprint to the packed representation (`tabCompress.length * 32` bits).
 
-```java
-BitPacking compressor = BitPackingFactory.create("overlap", BitUtils.getK(input));
-Test.testCompressionMethod(compressor, input);
-```
+## Handling Overflows
+- `BitPackingOverflow` stores metadata (original length and chosen `k'`) in the first 32 bits of the compressed stream.
+- Values exceeding `k'` bits are marked with a control bit and the index of their real value in the overflow area.
+- Overflow values are appended after the main packed stream; `get(i)` resolves them transparently.
+- This strategy mirrors the specification example (e.g., encoding `[1,2,3,1024,4,5,2048]` with 3-bit primaries and 11-bit overflow values).
 
-La methode affiche la taille compressee, verifie la coherence de `decompress` et `get`, puis signale toute divergence.
+## Future Work
+- Add formal unit tests (JUnit) for edge cases such as empty arrays, maximum 32-bit values, and repeated overflow patterns.
+- Extend the CLI or provide configuration files to benchmark external data sets.
+- Investigate support for negative numbers: discuss sign handling (two's complement, zigzag encoding, offsets) in the PDF report and implement a chosen policy.
+- Automate benchmark result exports (CSV/JSON) for plotting and comparison.
 
-## Benchmarks
-- `BenchmarkRunner` effectue 10 echauffements pour permettre l'optimisation JIT, puis repete la mesure `repetitions` fois.
-- Le temps retourne pour `get` correspond au cout moyen par acces (`ns` par element).
-- Le scenario `Main` compare egalement la taille du tableau compresse (nombre de mots de 32 bits) a la taille brute d'origine.
+## License
+Academic project for Software Engineering Project 2025. Add a formal license file before distributing beyond the course requirements.
 
-## Pistes d'amelioration
-- Ajouter une CLI ou des options pour choisir facilement le mode, la valeur de `k` ou charger des donnees depuis un fichier.
-- Etendre la suite de tests avec des cas limites (tableaux vides, valeurs max sur 32 bits, motifs repetitifs/extremes).
-- Exporter les resultats de benchmark au format CSV/JSON pour faciliter l'analyse et la comparaison sur de grands jeux de donnees.
-
-## Licence
-Projet academique (Software Engineering Project 2025). Ajouter une licence formelle si necessaire avant toute diffusion.
+## Author
+- Stevenson Jules
