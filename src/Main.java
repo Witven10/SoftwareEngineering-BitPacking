@@ -1,197 +1,25 @@
 public class Main {
     public static void main(String[] args) {
 
-
-        // ----------------------------------------- TEST maskK ------------------------------------------------------
-        System.out.println("maskK(3) = " + Integer.toBinaryString(BitUtils.maskK(3)));   // attendu :(0b111)
-        System.out.println("maskK(10) = " + Integer.toBinaryString(BitUtils.maskK(10))); // attendu : (0b1111111111)
-
-        // ----------------------------------------- TEST getBits ----------------------------------------
-        int word = 0b10110110; 
-        int bits = BitUtils.getBits(word, 1, 3); 
-        System.out.println("getBits(0b10110110, start=1, k=3) = " + Integer.toBinaryString(bits));
-
-        // ---------------------------------------- TEST setBits -------------------------------------------------------
-        int word2 = 0b00000000;
-        word2 = BitUtils.setBits(word2, 2, 3, 0b101);
-        System.out.println("setBits(0, start=2, k=3, value=5) = " + Integer.toBinaryString(word2));
-
+        // ---------------------------------------- TEST BitPacking -------------------------------------------------------
+        //int[] input4= {32768, 32768, 36664, 40000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
+        int[] input4 = {
+            32768, 32768, 36664, 40000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500,
+            1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10,
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+            31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100
+        };
         
-/*   
-        //--------------------------------TEST  BitPackingNoOverlap-----------------------------------------------
-        System.out.println(" ");
-        System.out.println("========== TEST NO OVERLAP========");
-        int[] input = {1000, 5000, 36664, 40000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
-
-        int k1= BitUtils.getK(input); 
-        BitPackingNoOverlap P = new BitPackingNoOverlap(k1);
-        System.err.println("k = "+k1 );
-
-        // Compression
-        int[] tabcompress = P.compress(input);
-        System.out.println("=== COMPRESSION ===");
-        for (int compressWord : tabcompress) {
-            System.out.println(Integer.toBinaryString(compressWord));
-        }
-
-        // Décompression
-        int[] output = new int[input.length];
-        output = P.decompress(output);
-
-        System.out.println("=== DECOMPRESSION ===");
-        for (int val : output) {
-            System.out.print(val + " ");
-        }
-        System.out.println();
-
-        // Test get
-        System.out.println("=== GET===");
-        System.out.println("Valeur à l'indice 3 = " + P.get(3));
-        System.out.println("Valeur à l'indice 0 = " + P.get(0));
-
-
- 
-    
-                //--------------------------------TEST  BitPackingOverlap-----------------------------------------------
-        System.out.println(" ");
-        System.out.println("========== TEST OVERLAP========");
-        int[] input2 = {1000, 5000, 36664, 40000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
-
-        int k2= BitUtils.getK(input2); 
-        BitPackingOverlap P2 = new BitPackingOverlap(k2);
-        System.err.println("k = "+k2);
-
-        // Compression
-        int[] tabcompress2 = P2.compress(input2);
-        System.out.println("=== COMPRESSION ===");
-        for (int compressWord2 : tabcompress2) {
-            System.out.println(Integer.toBinaryString(compressWord2));
-        }
-
-        // Décompression
-        int[] output2 = new int[input2.length];
-        output2 = P2.decompress(output2);
-
-        System.out.println("=== DECOMPRESSION ===");
-        for (int val : output2) {
-            System.out.print(val + " ");
-        }
-        System.out.println();
-
-        // Test get
-        System.out.println("=== GET===");
-        System.out.println("Valeur à l'indice 3 = " + P2.get(3));
-        System.out.println("Valeur à l'indice 0 = " + P2.get(0));
-        
-
-               //--------------------------------TEST  BitPackingOverflow-----------------------------------------------
-        System.out.println(" ");
-        System.out.println("========== TEST OVERFLOW========");
-        int[] input3= {1000, 5000, 36664, 40000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
-
-        int k3= BitUtils.getK(input3); 
-        BitPackingOverflow P3 = new BitPackingOverflow(k3);
-        System.err.println("k = "+k3);
-
-        // Compression
-        int[] tabcompress3 = P3.compress(input3);
-        System.out.println("=== COMPRESSION ===");
-        for (int compressWord3 : tabcompress3) {
-            System.out.println(Integer.toBinaryString(compressWord3));
-        }
-
-        // Décompression
-        int[] output3 = new int[input3.length];
-        output3 = P3.decompress(output3);
-
-        System.out.println("=== DECOMPRESSION ===");
-        for (int val : output3) {
-            System.out.print(val + " ");
-        }
-        System.out.println();
-
-        // Test get
-        System.out.println("=== GET===");
-        System.out.println("Valeur à l'indice 3 = " + P3.get(3));
-        System.out.println("Valeur à l'indice 0 = " + P3.get(0));        
-    
-
-
-
-
-            ///////////////////TEST Factory Method// /////////////////////
-            /// 
-        System.out.println(" ");
-        System.out.println("========== TEST FACTORY METHOD========");
-        int[] input4= {1000, 5000, 36664, 40000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
-        BitPacking compresseur = BitPackingFactory.create("overflow", BitUtils.getK(input4));
-        
-
-        /*int[] tabcompress4 = compresseur.compress(input4);
-        System.out.println("=== COMPRESSION ===");
-        for (int compressWord4 : tabcompress4) {
-            System.out.println(Integer.toBinaryString(compressWord4));      
-        }
-        int[] output4 = new int[input4.length];
-        output4 = compresseur.decompress(output4);  
-        System.out.println("=== DECOMPRESSION ===");
-        for (int val : output4) {
-            System.out.print(val + " ");
-        }
-        System.out.println();
-        System.out.println("=== GET===");
-        System.out.println("Valeur à l'indice 3 = " + compresseur.get(3));
-        System.out.println("Valeur à l'indice 0 = " + compresseur.get(0));
-        System.out.println();
-*/
-
-        int[] input4= {32768, 32768, 36664, 40000, 1000, 2, 9, 1000, 3, 8, 20, 30, 44, 88, 101, 300, 700, 1500};
-        //BitPacking compresseur = BitPackingFactory.create("overflow", BitUtils.getK(input4));
-        
-
         //testCompressionMethod(compresseur, input4);
         for (String mode : new String[]{"nooverlap", "overlap", "overflow"}) {
-            System.out.println("\n======== Test pour " + mode + " =========");
-            System.out.println("");
-            BitPacking compressor = BitPackingFactory.create(mode, BitUtils.getK(input4));
-            testCompressionMethod(compressor, input4);
+            System.out.println("\n\n//////////////////////////////////// TEST POUR " + mode + " ////////////////////////////////////");
+            System.out.println("\nTaille de l'entrée: " + input4.length + " entiers.");
+            int k= BitUtils.getK(input4);
+            BitPacking compressor = BitPackingFactory.create(mode, k);
+            Test.testCompressionMethod(compressor, input4);
         }
 
 
     }
-    public static void testCompressionMethod(BitPacking compresseur, int[] input) {
-        int[] compressed = compresseur.compress(input);
-        System.out.println("=== COMPRESSION ===");
-        for (int compressWord3 : compressed) { // afficher les mots compressés en binaire, pour vérifier visuellement en cas d'erreur
-            System.out.println(Integer.toBinaryString(compressWord3));
-        }
-        int[] output = new int[input.length];
-        output = compresseur.decompress(output);  
-        System.out.println("=== DECOMPRESSION ===AND=== GET===");
-        if(output.length != input.length) {
-            System.out.println("Erreur: la taille du tableau décompressé ne correspond pas à la taille du tableau d'entrée.");
-            return;
-        } 
-        boolean allCorrect = true;
-        for (int i = 0; i < input.length; i++) {
-            System.out.print(output[i] + " ");
-            if(output[i] != input[i]) {
-                System.out.println("\nErreur à l'indice " + i + ": valeur décompressée " + output[i] + " ne correspond pas à la valeur d'entrée " + input[i]);
-                allCorrect = false;
-            }
-            if(compresseur.get(i) != input[i]) {
-                allCorrect = false; 
-                System.out.println("\nErreur dans get() à l'indice " + i + ": valeur retournée " + compresseur.get(i) + " ne correspond pas à la valeur d'entrée " + input[i]);
-            }
-        }
 
-        System.out.println();
-        if(allCorrect) {
-            System.out.println("Tout fonctionne correctement pour toutes les valeurs.");
-        } else {
-            System.out.println("Il y a des erreurs.");
-
-        }
-        System.out.println("=============Fin du test pour ce mode=============");
-    }
 }

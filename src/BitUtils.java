@@ -15,6 +15,7 @@ public class BitUtils {
     // lire k bits à partir de start
     public static int getBits(int word, int start, int k) { 
         return (word>>start) & maskK(k);  // Je décale le mot de start positions vers la droite, puis j'applique le masque de k bits à 1, afin de ne garder que les k bits lus
+        
      }
 
     // écrire value (k bits) dans word à partir de start

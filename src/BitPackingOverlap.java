@@ -8,6 +8,8 @@ public class BitPackingOverlap implements BitPacking {
     @Override
     public int[] compress(int[] input) { 
         tabcompress = new int[(int)Math.ceil((double)(input.length*k)/32)];  //le nombre de bits exact qu'on veut écrire est input.length*k, donc le nombre de cases nécessaires est (input.length*k)/32 arrondi à l'entier supérieur
+        System.out.println("valeur de k : " + k + " Taille du tableau compressé (en bits) : " + tabcompress.length * 32);
+
         for(int i=0; i<input.length; i++){
 
             if(input[i] < 0 || input[i] >= (1<<k)) { //vérifie que la valeur peut être stockée dans k bits

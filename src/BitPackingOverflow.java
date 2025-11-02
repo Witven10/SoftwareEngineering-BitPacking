@@ -8,31 +8,43 @@ public class BitPackingOverflow implements BitPacking {
     @Override
     public int[] compress(int[] input) { 
         
-        int k_prime=7; //je fixe k' à 3 pour l'exemple, afin de tester le reste de l'algorithme que je veux utiliser, par la suite je chercherer un k optimale
+        int k_prime=k; 
+        int n= input.length;
         int n_overflow=0;
-        for (int i=0; i<input.length; i++){
-            if (input[i] >= (1<<k_prime)) { //si l'entier ne peut pas être stocké dans k_prime bits
-                n_overflow +=1; 
+        int minBits = Integer.MAX_VALUE; // Initialiser avec une valeur maximale
+        for( int kfind=1; kfind<=k; kfind++){ 
+            int tmp_overflow=0;
+            for(int i=0; i<n; i++){
+                if (input[i] >= (1<<kfind)) { //si l'entier ne peut pas être stocké dans k_prime bits
+                    tmp_overflow +=1; 
+                }
+            }
+            int total_bits= 32 + n * (kfind+1) + tmp_overflow* k; //nombre total de bits à stocker
+            if(total_bits < minBits) {
+                minBits = total_bits;   
+                k_prime = kfind;
+                n_overflow= tmp_overflow;
             }
         }
-        System.out.println("Nombre d'entiers en overflow: " + n_overflow);
-
-        //J'ai choisi de stocker ( input.lenght,  n_overflow, k_prime;) en début de tableau compressé, pour pouvoir les récupérer lors de la décompression
+   
+        //J'ai choisi de stocker ( input.lenght,  k_prime;) en début de tableau compressé, pour pouvoir les récupérer lors de la décompression
         //avec k_prime 5 bits maximum car on va écrire cahque nombre avec k_prime+1 bits (0 ou 1 + k' bits pour le nombre)
-        //J'ai choisi de limiter input.lenght et n_overflow à 12 bits chacun, pour simplifier le code, écrire les métadonnées sur un int (32 bits)
-        // on peut donc stocker des tableaux de taille maximum 4095 (2^12-1) et avec un maximum de 4095 entiers en overflow
-        
-        if(input.length > 4095) {
-            throw new IllegalArgumentException("Taille du tableau d'entrée dépasse la limite de 4095: " + input.length);
+        //J'ai choisi de limiter input.lenght sur les 27 bits restants 
+        //pour simplifier le code j'ai décider d'écrire ces données que sur un int (32 bits)
+        // on peut donc stocker des tableaux de taille maximum 134217727 (2^27-1) 
+        if(input.length > 134217727) {
+            throw new IllegalArgumentException("Taille du tableau d'entrée dépasse la limite de 134217727 (2^27-1) : " + input.length);
         }
 
         int total_bits= 32 + input.length * (k_prime+1) + n_overflow * k; //nombre total de bits à stocker
         tabcompress = new int[(int)Math.ceil((double)(total_bits)/32)];
-        //on écrit d'abord les métadonnées
+        System.out.println("valeur de k : " + k + " Taille du tableau compressé (en bits) : " + tabcompress.length * 32);
+
+
+        //on écrit d'abord les la taille et k' au début de tabcompress
         
-        tabcompress[0]= BitUtils.setBits(tabcompress[0], 0, 12, input.length); //on écrit input.length sur 12 bits
-        tabcompress[0]= BitUtils.setBits(tabcompress[0], 12, 12, n_overflow); //on écrit n_overflow sur 12 bits  
-        tabcompress[0]=BitUtils.setBits(tabcompress[0], 24, 5, k_prime); //on écrit k' sur 5 bits 
+        tabcompress[0]= BitUtils.setBits(tabcompress[0], 0, 27, input.length); //on écrit input.length sur 12 bits
+        tabcompress[0]=BitUtils.setBits(tabcompress[0], 27, 5, k_prime); //on écrit k' sur 5 bits 
         int k_plus1= k_prime + 1;    
         int pos_overflow=0; //position de l'entier en overflow dans la liste des entiers en overflow 
         for(int i=0; i<input.length; i++){
@@ -114,9 +126,8 @@ public class BitPackingOverflow implements BitPacking {
     @Override
     public int get(int i) { 
 
-        int taille= BitUtils.getBits(tabcompress[0], 0, 12);
-        //int n_overflow= BitUtils.getBits(tabcompress[0], 12, 12);
-        int k_prime= BitUtils.getBits(tabcompress[0], 24, 5);
+        int taille= BitUtils.getBits(tabcompress[0], 0, 27);
+        int k_prime= BitUtils.getBits(tabcompress[0], 27, 5);
         int k_plus1= k_prime + 1;
 
         int index= (32+i*k_plus1)/32; 
