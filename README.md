@@ -26,8 +26,8 @@ Java implementation of bit packing strategies to compress integer arrays while p
 - `src/Test.java`: correctness checks and console reporting.
 - `src/BenchmarkRunner.java`: timing protocol with JVM warm-up and averaging.
 - `src/Main.java`: entry point combining validation and benchmarking.
-- `report/`: placeholder for the required PDF report (create and commit your document here).
-- `docs/`: optional location for additional artefacts (e.g., charts, design notes).
+- `Stevenson_Jules_report.pdf`: final project report covering requirements, design decisions, benchmarks, and profitability analysis.
+
 
 ## Prerequisites
 - JDK 17 or newer (any standard JVM distribution).  
@@ -44,6 +44,8 @@ javac -d out src/*.java
 java -cp out Main
 # Run targeted scenarios with per-mode profitability (optional)
 java -cp out ValidationScenarios
+
+# The final report is shipped as a PDF: report/Stevenson_Jules_report.pdf
 ```
 
 The default `Main` workflow:
