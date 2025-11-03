@@ -22,7 +22,7 @@ public class BitUtils {
     public static int setBits(int word, int start, int k, int value) {
         int maskset= maskK(k)<<start;  // masque de k bits à 1 décalé de start positions vers la gauche
         word= word & ~maskset;    //je mets à 0 les k bits à partir de start dans word
-        return word | value<<start; //je fais un ou logique entre word et value décalé de start positions vers la gauche, afin d'écrire value dans word
+        return word | (value & maskK(k)) << start; // j'écris value (k bits) dans word à partir de start en faisant un ou logique
     }
 
     //pour obtenir k

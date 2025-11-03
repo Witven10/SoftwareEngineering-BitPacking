@@ -26,7 +26,27 @@ public class BitPackingOverflow implements BitPacking {
                 n_overflow= tmp_overflow;
             }
         }
-   
+        
+        // 1. Calculer les bits requis pour l'index d'overflow (k_index)
+        //car si kprime doit pouvoir stocker toutes les positions des entiers en overflow
+        int k_index = 0;
+        if (n_overflow > 0) {
+            k_index = 32 - Integer.numberOfLeadingZeros(n_overflow - 1);
+        }
+        if (k_index > k_prime) {
+            // Le k' optimal choisi pour la valeur est trop petit pour l'index d'overflow.
+            // On force k_prime à être la taille requise pour l'index d'overflow.
+            k_prime = k_index; 
+            
+            // kprime change, n_overflow doit être recalculé
+            n_overflow = 0;
+            for (int val : input) {
+                if (val >= (1 << k_prime)) {
+                    n_overflow++;
+                }
+            }
+        }
+
         //J'ai choisi de stocker ( input.lenght,  k_prime;) en début de tableau compressé, pour pouvoir les récupérer lors de la décompression
         //avec k_prime 5 bits maximum car on va écrire cahque nombre avec k_prime+1 bits (0 ou 1 + k' bits pour le nombre)
         //J'ai choisi de limiter input.lenght sur les 27 bits restants 
@@ -164,12 +184,11 @@ public class BitPackingOverflow implements BitPacking {
             }
             else{ // sinon on doit lire les writebits1_o bits dans tabcompress[overflow_index] et les k-writebits1_o bits dans tabcompress[overflow_index+1]
                 int part1= BitUtils.getBits(tabcompress[overflow_index], overflow_start, writebits1_o);
+                retour_overflow = part1; //si on est ici, c'est que l'entier en overflow est mal formé, on retourne au moins la partie lue
+
                 if (overflow_index + 1 < tabcompress.length) {
                     int part2= BitUtils.getBits(tabcompress[overflow_index+1], 0, k - writebits1_o);
                     retour_overflow=  part1 | (part2 << writebits1_o); 
-                }
-                else {
-                    retour_overflow = part1; //si on est ici, c'est que l'entier en overflow est mal formé, on retourne au moins la partie lue
                 }
             } 
             return retour_overflow;

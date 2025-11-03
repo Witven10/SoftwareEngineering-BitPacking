@@ -15,6 +15,7 @@ Java implementation of bit packing strategies to compress integer arrays while p
 - `BitPackingFactory`: centralised creation of the desired strategy from a single string parameter (`"nooverlap"`, `"overlap"`, `"overflow"`).
 - `Test` harness: validates `compress`, `decompress`, and `get` for every implementation.
 - `BenchmarkRunner`: warm-up aware timing harness returning average nanosecond costs for each primitive operation.
+- `ValidationScenarios`: standalone driver that replays representative datasets, validates the three modes, and reports compression profitability per scenario.
 - `Main`: demonstration runner that executes validation, benchmarks, and reports compression ratios.
 
 ## Repository Layout
@@ -41,6 +42,8 @@ javac -d out src/*.java
 
 # Run validation + benchmark scenario
 java -cp out Main
+# Run targeted scenarios with per-mode profitability (optional)
+java -cp out ValidationScenarios
 ```
 
 The default `Main` workflow:
@@ -48,7 +51,8 @@ The default `Main` workflow:
 - instantiates each compressor (`nooverlap`, `overlap`, `overflow`) through the factory,
 - runs `Test.testCompressionMethod` to confirm round-trip integrity and `get(i)` correctness,
 - benchmarks compression, decompression, and random access times, plus calculates compression ratio and space savings,
-- prints latency payback information (`T_C + T_D`) to estimate when compression amortises transmission delays.
+- prints latency payback information (`T_C + T_D`) to estimate when compression amortises transmission delays,
+- and delegates to `ValidationScenarios` for deeper comparisons that reuse `BenchmarkRunner` to display average compression/decompression costs and the minimum transmission speedup required for each dataset and packing mode.
 
 ### Customising Experiments
 - Edit `src/Main.java` to change the sample array (`input_bench`) or the number of benchmark repetitions (`REPETITIONS`).
